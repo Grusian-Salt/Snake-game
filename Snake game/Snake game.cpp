@@ -8,7 +8,7 @@ const int max_y = 43;
 int start_snake_size = 3;
 bool life = true;
 bool win = false;
-
+char Direction = '>';
 class apple
 {
 private:
@@ -55,21 +55,28 @@ private:
         {
             Node* NodeA = new Node{ head->X,head->Y + 1,head };
             head = NodeA;
+
+            Direction = '>';
         }
         else if (direction == 3 && head->X < max_x)
         {
             Node* NodeA = new Node{ head->X + 1,head->Y,head };
             head = NodeA;
+            
+            Direction = '!';
         }
         else if (direction == 4 && head->Y > 0)
         {
             Node* NodeA = new Node{ head->X,head->Y - 1,head };
             head = NodeA;
+            Direction = '<';
         }
         else if (direction == 1 && head->X > 0)
         {
             Node* NodeA = new Node{ head->X - 1,head->Y,head };
             head = NodeA;
+            
+            Direction = '^';
         }
         else life = false;
     }
@@ -158,23 +165,24 @@ uint8_t why(char key)
 
 void print(apple* app, snake* snk)
 {
-    std::cout << "╔";
-    for (int i = 0; i < max_y; i++) { std::cout << "═"; }
-    std::cout << "╗" << std::endl;
+    std::cout << "*";
+    for (int i = 0; i < max_y; i++) { std::cout << "-"; }
+    std::cout << "*" << std::endl;
     for (int i = 0; i < max_x; i++)
     {
-        std::cout << "║";
+        std::cout << "|";
         for (int j = 0; j < max_y; j++)
         {
-            if (snk->public_search_recursive(snk->getHead(), i, j) == true) std::cout << "0";
-            else if (app->getX() == i && app->getY() == j) std::cout << "†";
+            if(snk->getHead()->X == i && snk->getHead()->Y == j) std::cout << Direction;
+            else if (snk->public_search_recursive(snk->getHead(), i, j) == true) std::cout << "#";
+            else if (app->getX() == i && app->getY() == j) std::cout << "@";
             else std::cout << " ";
         }
-        std::cout << "║" << std::endl;
+        std::cout << "|" << std::endl;
     }
-    std::cout << "╚";
-    for (int i = 0; i < max_y; i++) { std::cout << "═"; }
-    std::cout << "╝" << std::endl;
+    std::cout << "*";
+    for (int i = 0; i < max_y; i++) { std::cout << "-"; }
+    std::cout << "*" << std::endl;
 }
 
 int main()
