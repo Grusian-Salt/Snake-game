@@ -1,14 +1,9 @@
 ﻿#include <iostream>
 #include <ctime>
-#include <conio.h>
-#include "windows.h"
 
-const int max_x = 15;
-const int max_y = 43;
-int start_snake_size = 3;
-bool life = true;
-bool win = false;
-char Direction = '>';
+size_t max_x = 15;
+size_t max_y = 43;
+size_t start_snake_size = 3;
 class apple
 {
 private:
@@ -46,8 +41,10 @@ private:
     };
 
     Node* head;
-    int size;
-    uint8_t directionTemp;
+    size_t size;
+    uint8_t tempDirection;
+    bool life;
+    char charDirection;
 
     void createNode(uint8_t direction)
     {
@@ -56,27 +53,27 @@ private:
             Node* NodeA = new Node{ head->X,head->Y + 1,head };
             head = NodeA;
 
-            Direction = '>';
+            charDirection = '>';
         }
         else if (direction == 3 && head->X < max_x)
         {
             Node* NodeA = new Node{ head->X + 1,head->Y,head };
             head = NodeA;
             
-            Direction = '!';
+            charDirection = '!';
         }
         else if (direction == 4 && head->Y > 0)
         {
             Node* NodeA = new Node{ head->X,head->Y - 1,head };
             head = NodeA;
-            Direction = '<';
+            charDirection = '<';
         }
         else if (direction == 1 && head->X > 0)
         {
             Node* NodeA = new Node{ head->X - 1,head->Y,head };
             head = NodeA;
             
-            Direction = '^';
+            charDirection = '^';
         }
         else life = false;
     }
@@ -108,7 +105,9 @@ public:
     {
         size = start_snake_size;
         head = nullptr;
-        directionTemp = 2;
+        tempDirection = 2;
+        charDirection = '>';
+        life = true;
         for (size_t i = 0; i < start_snake_size; i++)
         {
             Node* NodeA = new Node{ max_x / 2,2 + i,head };
@@ -119,7 +118,7 @@ public:
     void snakeGo(uint8_t direction, apple* app)
     {
         //Создаём голову
-        if (direction == 0) direction = directionTemp;
+        if (direction == 0) direction = tempDirection;
         createNode(direction);
         //Проверяем, находится ли голова в теле с помощью рекурсии
         Node* temp = head->Next;
@@ -129,14 +128,13 @@ public:
         if (head->X == app->getX() && head->Y == app->getY())
         {
             size++;
-            if (size == max_y * max_x) win = true;
             deltemp = false;
             //Удаляем яблоко
             app->rerandom();
         }
         //Удаляем крайний Node змеи
         if (deltemp == true)delete_recursive(head->Next);
-        directionTemp = direction;
+        tempDirection = direction;
     }
     bool public_search_recursive(Node* temp1, size_t X, size_t Y)
     {
@@ -150,8 +148,9 @@ public:
         }
         return false;
     }
-
-
+    char getCharDirection(){return charDirection;}
+    size_t getSize() { return size; }
+    bool getLife() { return life; }
 };
 
 uint8_t why(char key)
@@ -162,9 +161,13 @@ uint8_t why(char key)
     else if (key == 'a' || key == 'A') return 4;
     return 0;
 }
+void gameRestart(apple* app, snake* snk)
+{
 
+}
 void print(apple* app, snake* snk)
 {
+    std::cout << "Size:"<<snk->getSize()<<std::endl;
     std::cout << "*";
     for (int i = 0; i < max_y; i++) { std::cout << "-"; }
     std::cout << "*" << std::endl;
@@ -173,7 +176,7 @@ void print(apple* app, snake* snk)
         std::cout << "|";
         for (int j = 0; j < max_y; j++)
         {
-            if(snk->getHead()->X == i && snk->getHead()->Y == j) std::cout << Direction;
+            if(snk->getHead()->X == i && snk->getHead()->Y == j) std::cout << snk->getCharDirection();
             else if (snk->public_search_recursive(snk->getHead(), i, j) == true) std::cout << "#";
             else if (app->getX() == i && app->getY() == j) std::cout << "@";
             else std::cout << " ";
@@ -190,13 +193,15 @@ int main()
     snake snk;
     apple app;
     char key;
-    while (life == true && win == false)
+    while (snk.getLife() == true && snk.getSize()<max_x * max_y)
     {
         print(&app, &snk);
         std::cin >> key;
         snk.snakeGo(why(key), &app);
         system("CLS");
     }
+
+
 }
 
 
